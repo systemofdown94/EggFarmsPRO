@@ -53,7 +53,30 @@ struct SettingsView: View {
                 }
             }
             .sheet(isPresented: $showPrivacy) {
-                PrivacyView()
+                ZStack {
+                    Color(hex: "F9F9F9")
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 0) {
+                        HStack {
+                            Button {
+                                showPrivacy = false
+                            } label: {
+                                Image(systemName: "multiply")
+                                    .font(.system(size: 20, weight: .medium))
+                                    .foregroundStyle(.black.opacity(0.5))
+                            }
+                            .frame(width: 40, height: 40)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding()
+                        
+                        WebView(url: URL(string: "https://docs.google.com/document/d/1bCXRN68Yve5KYbwXhxQ9jVpKRLPq6kmgQ6fRB13Z748/edit?usp=sharing")!)
+                            .navigationTitle("Privacy Policy")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .ignoresSafeArea(edges: .bottom)
+                    }
+                }
             }
             .alert("Push permission wasn't allowed", isPresented: $showPushError) {}
             .alert("Are you sure you want to delete all the data?", isPresented: $showDeleteAlert) {
