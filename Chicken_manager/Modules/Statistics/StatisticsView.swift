@@ -66,7 +66,7 @@ struct StatisticsView: View {
     }
     
     private var background: some View {
-        Image(.Images.mainBG)
+        Image(.Images.BG)
             .resizeCrop()
     }
     
