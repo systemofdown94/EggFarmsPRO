@@ -89,7 +89,7 @@ struct SettingsView: View {
     }
     
     private var background: some View {
-        Image(.Images.BG)
+        Image(.BG)
             .resizeCrop()
     }
     

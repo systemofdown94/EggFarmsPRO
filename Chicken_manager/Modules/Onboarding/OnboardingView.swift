@@ -18,7 +18,7 @@ struct OnboardingView: View {
     }
     
     private var background: some View {
-        Image(.Images.BG)
+        Image(.BG)
             .resizeCrop()
     }
     
