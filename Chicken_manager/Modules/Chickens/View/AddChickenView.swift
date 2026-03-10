@@ -241,7 +241,7 @@ struct AddChickenView: View {
                 .padding(.horizontal)
                 
                 
-                DatePicker("", selection: $chicken.birthDate, displayedComponents: [.date])
+                DatePicker("", selection: $chicken.birthDate, in: ...Date(), displayedComponents: [.date])
                     .labelsHidden()
                     .datePickerStyle(.graphical)
                     .tint(.appOrange)

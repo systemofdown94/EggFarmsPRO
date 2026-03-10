@@ -68,32 +68,49 @@ final class StatisticsViewModel: ObservableObject {
     
     private func weekEntries() -> [EggChartEntry] {
         let calendar = Calendar.current
-        guard let interval = calendar.dateInterval(of: .weekOfYear, for: Date()) else { return [] }
+        let now = Date()
+        
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now) else {
+            return []
+        }
+        
+        let todayWeekday = calendar.component(.weekday, from: now)
+        let firstWeekday = calendar.firstWeekday
+        
+        let days = (firstWeekday...todayWeekday)
         
         var grouped: [Int: Int] = [:]
         
         for chicken in chickens {
-            let basePerDay = chicken.eggsPerWeek / 7
             
-            for weekday in 1...7 {
-                grouped[weekday, default: 0] += basePerDay
+            for weekday in days {
+                
+                guard let date = calendar.date(
+                    bySetting: .weekday,
+                    value: weekday,
+                    of: weekInterval.start
+                ) else { continue }
+                
+                if date >= chicken.birthDate {
+                    grouped[weekday, default: 0] += chicken.eggsPerWeek / 7
+                }
             }
             
-            for note in chicken.eggNotes where interval.contains(note.date) {
+            for note in chicken.eggNotes where weekInterval.contains(note.date) {
                 let weekday = calendar.component(.weekday, from: note.date)
-                grouped[weekday, default: 0] += note.count
+                
+                if weekday <= todayWeekday {
+                    grouped[weekday, default: 0] += note.count
+                }
             }
         }
         
         let symbols = calendar.shortWeekdaySymbols
-        let firstWeekday = calendar.firstWeekday
         
-        return (0..<7).map { offset in
-            let weekdayIndex = (firstWeekday + offset - 1) % 7 + 1
-            
-            return EggChartEntry(
-                label: symbols[weekdayIndex - 1].lowercased(),
-                value: grouped[weekdayIndex] ?? 0
+        return days.map { weekday in
+            EggChartEntry(
+                label: symbols[weekday - 1].lowercased(),
+                value: grouped[weekday] ?? 0
             )
         }
     }
@@ -102,27 +119,43 @@ final class StatisticsViewModel: ObservableObject {
         let calendar = Calendar.current
         let now = Date()
         
-        guard let monthInterval = calendar.dateInterval(of: .month, for: now),
-              let weekRange = calendar.range(of: .weekOfMonth, in: .month, for: now)
-        else { return [] }
+        guard let monthInterval = calendar.dateInterval(of: .month, for: now) else {
+            return []
+        }
+        
+        let currentWeek = calendar.component(.weekOfMonth, from: now)
+        let weeks = 1...currentWeek
         
         var grouped: [Int: Int] = [:]
         
         for chicken in chickens {
-            for week in weekRange {
+            
+            let birthWeek = calendar.component(.weekOfMonth, from: chicken.birthDate)
+            let birthMonth = calendar.component(.month, from: chicken.birthDate)
+            let currentMonth = calendar.component(.month, from: now)
+            
+            for week in weeks {
+                
+                if birthMonth == currentMonth && week < birthWeek {
+                    continue
+                }
+                
                 grouped[week, default: 0] += chicken.eggsPerWeek
             }
             
             for note in chicken.eggNotes where monthInterval.contains(note.date) {
                 let week = calendar.component(.weekOfMonth, from: note.date)
-                grouped[week, default: 0] += note.count
+                
+                if week <= currentWeek {
+                    grouped[week, default: 0] += note.count
+                }
             }
         }
         
-        return weekRange.map { week in
+        return weeks.map {
             EggChartEntry(
-                label: "\(week) week",
-                value: grouped[week] ?? 0
+                label: "\($0) week",
+                value: grouped[$0] ?? 0
             )
         }
     }
@@ -131,29 +164,51 @@ final class StatisticsViewModel: ObservableObject {
         let calendar = Calendar.current
         let now = Date()
         
-        guard let startDate = calendar.date(byAdding: .year, value: -1, to: now) else {
-            return []
+        var months: [Date] = []
+        
+        for offset in stride(from: 11, through: 0, by: -1) {
+            if let date = calendar.date(byAdding: .month, value: -offset, to: now) {
+                months.append(date)
+            }
         }
         
         var grouped: [Int: Int] = [:]
         
         for chicken in chickens {
-            for month in 1...12 {
-                grouped[month, default: 0] += chicken.eggsPerWeek * 4
+            
+            for (index, monthDate) in months.enumerated() {
+                
+                guard let interval = calendar.dateInterval(of: .month, for: monthDate) else {
+                    continue
+                }
+                
+                if chicken.birthDate <= interval.end {
+                    grouped[index, default: 0] += chicken.eggsPerWeek * 4
+                }
             }
             
-            for note in chicken.eggNotes where note.date >= startDate {
-                let month = calendar.component(.month, from: note.date)
-                grouped[month, default: 0] += note.count
+            for note in chicken.eggNotes {
+                
+                for (index, monthDate) in months.enumerated() {
+                    
+                    guard let interval = calendar.dateInterval(of: .month, for: monthDate) else {
+                        continue
+                    }
+                    
+                    if interval.contains(note.date) {
+                        grouped[index, default: 0] += note.count
+                    }
+                }
             }
         }
         
-        let symbols = calendar.shortMonthSymbols
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM"
         
-        return (1...12).map { month in
+        return months.enumerated().map { index, date in
             EggChartEntry(
-                label: symbols[month - 1],
-                value: grouped[month] ?? 0
+                label: formatter.string(from: date),
+                value: grouped[index] ?? 0
             )
         }
     }

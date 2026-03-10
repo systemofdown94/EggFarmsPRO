@@ -28,7 +28,7 @@ extension AIChatViewModel {
     func sendMessage(with text: String? = nil) {
         let newMessageText = text ?? enteredText
         
-        chat.messages.append(Message(text: text ?? enteredText, isUser: true))
+        chat.messages.append(Message(text: newMessageText, isUser: true))
     
         isLoading = true
         enteredText = ""

@@ -95,6 +95,6 @@ struct AIChat: Identifiable, Equatable {
 
             Before starting, verify that **backyard chickens are allowed** in your area.
             """
-        self.messages = isMock ? [Message(isMock: true)] : [Message(text: "How can i grow Chicken?", isUser: true), Message(text: text, isUser: false)]
+        self.messages = isMock ? [Message(isMock: true)] : []
     }
 }

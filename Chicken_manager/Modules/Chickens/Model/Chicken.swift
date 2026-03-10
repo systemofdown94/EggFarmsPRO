@@ -55,7 +55,7 @@ extension Chicken {
                                                       from: birthDate,
                                                       to: now).weekOfYear ?? 0
         
-        guard weeksSinceBirth > 0 else { return 0 }
+        guard weeksSinceBirth > 0 else { return Double(eggsPerWeek) }
         
         let baseEggs = weeksSinceBirth * eggsPerWeek
         let notesEggs = eggNotes.reduce(0) { $0 + $1.count }

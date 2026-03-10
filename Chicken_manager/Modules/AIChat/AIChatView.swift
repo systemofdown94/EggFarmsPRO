@@ -59,14 +59,16 @@ struct AIChatView: View {
                 
                 Spacer()
                 
-                Button {
-                    viewModel.removeChat()
-                } label: {
-                    Image(systemName: "trash")
-                        .font(.system(size: 24, weight: .medium))
-                        .foregroundStyle(.red)
+                if !viewModel.chat.messages.isEmpty {
+                    Button {
+                        viewModel.removeChat()
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundStyle(.red)
+                    }
+                    .frame(width: 40, height: 40)
                 }
-                .frame(width: 40, height: 40)
             }
             
             Text("AI Assistant")
